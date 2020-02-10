@@ -1,0 +1,159 @@
+
+(defun format-buffer()
+	(interactive)
+	(start-process "goreturn" nil "goreturns" (buffer-file-name))
+	(revert-buffer nil t))
+
+(global-set-key (kbd "s-7") 'format-buffer)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Environment, load and exec paths
+(setenv "GOPATH" (expand-file-name "~/go"))
+(setenv "PATH"  (concat (getenv "PATH") ":" "/usr/local/bin" ":" (concat (getenv "GOPATH") "/bin")))
+(setenv "GOROOT" "/Users/gerardo.borbolla/.gimme/versions/go1.13.7.darwin.amd64")
+
+(add-to-list 'load-path (expand-file-name "~/lib/emacs"))
+(add-to-list 'load-path (expand-file-name "~/lib/emacs/flycheck"))
+(add-to-list 'load-path (expand-file-name "~/lib/emacs/use-package"))
+(add-to-list 'load-path (expand-file-name "~/lib/emacs/emacs-async"))
+(add-to-list 'load-path (expand-file-name "~/lib/emacs/popup-el"))
+(add-to-list 'load-path (expand-file-name "/usr/local/share/emacs/site-lisp/helm/"))
+
+
+;; Line numbers
+(add-hook 'go-mode-hook #'display-line-numbers-mode)
+(add-hook 'java-mode-hook #'display-line-numbers-mode)
+(add-hook 'ruby-mode-hook #'display-line-numbers-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Package management
+(package-initialize)
+(require 'use-package)
+(add-to-list 'package-archives (cons "melpa" "https://melpa.org/packages/") t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Theme and user interface
+(load-theme 'ample t t)
+(enable-theme 'ample)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Custom scripts
+(load "valimail_db_settings")
+;; (load "go_dev")
+(load "move-duplicate-region")
+(load "go-support")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Keybindings
+
+;; Text
+(global-set-key (kbd "S-s-<up>") 'move-text-up)
+(global-set-key (kbd "S-s-<down>") 'move-text-down)
+(global-set-key (kbd "s-a") 'move-beginning-of-line)
+(global-set-key (kbd "s-d") 'duplicate-current-line-or-region)
+(global-set-key (kbd "s-P") 'helm-find-files)
+(global-set-key (kbd "s-s") 'save-buffer)
+(global-set-key (kbd "s-l") 'goto-line)
+(global-set-key (kbd "s-z") 'undo)
+(global-set-key (kbd "s-/") 'comment-region)
+(global-set-key (kbd "s-c") 'kill-ring-save)
+
+;; Windows and buffers
+(global-set-key (kbd "s-}") (lambda () (interactive) (select-window (next-window))))
+(global-set-key (kbd "s-{") (lambda () (interactive) (select-window (previous-window))))
+(global-set-key (kbd "s-;") 'switch-to-buffer)
+(global-set-key (kbd "s-w") (lambda () (interactive) (kill-current-buffer)))
+(global-set-key (kbd "s-1") 'treemacs)
+(global-set-key (kbd "s-2") 'delete-other-windows)
+(global-set-key (kbd "C-<tab>") 'next-buffer)
+(global-set-key (kbd "S-C-<tab>") 'previous-buffer)
+
+;; Utilities and modes
+(global-set-key (kbd "s-O") 'helm-browse-project)
+(global-set-key (kbd "s-S") 'helm-projectile-ag)
+(global-set-key (kbd "s-9") 'magit-status)
+(add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
+
+;; Search, find files
+(global-set-key (kbd "s-p") 'find-file)
+(global-set-key (kbd "s-b") 'godef-jump)
+(global-set-key (kbd "<f1>") 'godef-describe)
+(global-set-key (kbd "s-[") 'pop-global-mark)
+
+;; Compile, Test, lint
+(global-set-key (kbd "s-0") 'eval-last-sexp)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Package configuration
+(autoload 'dired-async-mode "dired-async-mode.el" nil t)
+(setq make-backup-files nil)
+
+(init-go-hooks)
+
+;; Autocomplete, find and search
+(require 'company)
+(add-hook 'after-init-hook 'global-company-mode)
+(eval-after-load 'company
+	'(push 'company-robe company-backends))
+
+(require 'helm-config)
+(helm-mode 1)
+(require 'helm-ls-git)
+;;(require 'flycheck)
+
+
+;; lsp stuff
+;; (require 'lsp)
+;; (require 'lsp-java)
+;; (add-hook 'java-mode-hook #'lsp)
+;; (load "helm-lsp")
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(c-cleanup-list (quote set-from-style))
+ '(column-number-mode t)
+ '(custom-safe-themes
+	 (quote
+		("c9ddf33b383e74dac7690255dd2c3dfa1961a8e8a1d20e401c6572febef61045" "59171e7f5270c0f8c28721bb96ae56d35f38a0d86da35eab4001aebbd99271a8" default)))
+ '(dired-use-ls-dired nil)
+ '(exec-path
+	 (quote
+		("/usr/bin" "/bin" "/usr/sbin" "/sbin" "/Applications/Emacs.app/Contents/MacOS/bin-x86_64-10_14" "/Applications/Emacs.app/Contents/MacOS/libexec-x86_64-10_14" "/Applications/Emacs.app/Contents/MacOS/libexec" "/Applications/Emacs.app/Contents/MacOS/bin" "/Users/gerardo.borbolla/go/bin" "/Users/gerardo.borbolla/bin" "/usr/local/bin/")))
+ '(global-auto-revert-mode t)
+ '(godoc-at-point-function (quote godoc-gogetdoc))
+ '(helm-ag-base-command "ag --nocolor --nogroup --hidden")
+ '(helm-ag-ignore-patterns (quote (".git")))
+ '(json-reformat:indent-width 2)
+ '(magit-auto-revert-mode nil)
+ '(make-backup-files nil)
+ '(markdown-command "/usr/local/bin/markdown")
+ '(mode-require-final-newline nil)
+ '(ns-command-modifier (quote super))
+ '(package-selected-packages
+	 (quote
+		(ample-theme homebrew-mode helm-ls-git helm-go-package ag json-mode lsp-java treemacs-icons-dired treemacs-magit treemacs-projectile flycheck-clojure clojure-snippets clojure-mode flycheck-yamllint yaml-mode atom-one-dark-theme plantuml-mode helm-robe robe dap-mode docker-cli docker-compose-mode dockerfile-mode helm-ag helm-projectile emacsql-psql poly-ansible company-ansible ansible-doc ansible yasnippet company-lsp lsp-ui lsp-mode company company-go go-autocomplete auto-complete docker terraform-mode exec-path-from-shell magit move-text cider markdown-preview-mode go-eldoc)))
+ '(plantuml-default-exec-mode (quote jar))
+ '(plantuml-jar-path "/Users/gerardo.borbolla/lib/java/plantuml.jar")
+ '(require-final-newline nil)
+ '(savehist-mode t)
+ '(speedbar-show-unknown-files t)
+ '(sql-connection-alist (quote defend_dbs))
+ '(sql-port 5433)
+ '(sql-postgres-program "/usr/local/opt/postgresql@10/bin/psql")
+ '(sql-server "localhost")
+ '(standard-indent 2)
+ '(tab-width 2)
+ '(tool-bar-mode nil))
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :stipple nil :background "#282C34" :foreground "#ABB2BF" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 160 :width normal :foundry "nil" :family "Menlo")))))
+
